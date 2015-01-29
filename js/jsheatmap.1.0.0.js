@@ -19,6 +19,8 @@
        var rand;
        var HeatData=[];
        var ObjSeries={};
+	   var byweek={};
+	   var bymonth={};
        // Merge options with defaults
        var settings = $.extend({
        	  title		: {
@@ -49,7 +51,15 @@
        	  	 popup		:{
        	  	 	show 		: true,
        	  	 	Text	: "count"
-			}
+			 },
+			 colorRange	:{
+			 	"0-0":"#000000",
+			 	"1-20":"#2ea300",
+			 	"21-40":"#90ff00",
+			 	"41-60":"#fff600",
+			 	"61-80":"#ff8c00",
+			 	"81-100":"#ff0000 "
+			 }
        	  },
        	  colorRange:{
        	  	start:[]
@@ -65,7 +75,7 @@
           		itemCount 	: 0,
 
           },
-          heatSeries:[]	
+          heatSeries:{}	
 
           
        }, options || {});
@@ -119,14 +129,38 @@
  	   	ObjSeries.zSeries=[];
  	   	ObjSeries.xSeries=[];
  	   	ObjSeries.ySeries=[];
- 	   	$.each(settings.heatSeries,function(key,value){
- 	   			ObjSeries.zSeries.push(value.z);
- 	   			ObjSeries.xSeries.push(value.x);
- 	   			ObjSeries.ySeries.push(value.y);
- 	   	})
+ 	   	if($.isArray(settings.heatSeries))
+ 	   	{
+	 	   	$.each(settings.heatSeries,function(key,value){
+	 	   			ObjSeries.zSeries.push(value.z);
+	 	   			ObjSeries.xSeries.push(value.x);
+	 	   			ObjSeries.ySeries.push(value.y);
+	 	   			console.log(getWeekNumber(value.x))
+	 	   	});
+
+			var result = groupBy(settings.heatSeries, function(item) {
+					    return [item.x];
+			});
+			heatCol=result.length;
+			heatRow=(settings.heatSeries.length/result.length);
+ 	   	}
+ 	   	else
+ 	   	{
+ 	   		$.each(settings.heatSeries,function(key,value){
+ 	   			$.each(value.total_events,function(hour,cnt){
+ 	   				ObjSeries.zSeries.push(cnt);
+	 	   			ObjSeries.xSeries.push(key);
+	 	   			ObjSeries.ySeries.push(hour);
+ 	   			})
+	 	   	})
+	 	   	heatCol=Object.keys(settings.heatSeries).length;
+	 	   	firstItem=Object.keys(settings.heatSeries)[0];
+	 	   	heatRow=Object.keys(settings.heatSeries[firstItem].total_events).length;
+	 	
+ 	   	}
  	   	ObjSeries.zmin=Math.min.apply(Math, ObjSeries.zSeries)
  	   	ObjSeries.zmax=Math.max.apply(Math,ObjSeries.zSeries)
- 	   	var graphcss='height: 100%; width: 100%;';
+ 	   	var graphcss='height: 90%; width: 100%;';
  	   	$(elem).append('<div class="HeatMap" id="heatmap-'+rand+'"></div>');
  	   	if(settings.title.show)
  	   		$('.HeatMap').append('<div class="HeatMapTitle" id="HeatMapTitle" style="font-size: 18px ;text-align: center;padding: 2px;">'+settings.title.text+'</div>');
@@ -160,61 +194,168 @@
         
         var tempObj=[];
         var tempData=null;
-         
-		var result = groupBy(settings.heatSeries, function(item) {
-				    return [item.x];
-		});
-		heatCol=result.length;
-		heatRow=(settings.heatSeries.length/result.length);
-		$('.HeatMap').append('<div class="HeatMaparea" id="HeatMaparea" style="'+graphcss+'"></div>');
-		if(ObjSeries.type=='col')
-		{
-			percent=90/heatCol;
-			heightPercent=90/heatRow;
-			Titlehtml='<div class="HeatColumn" style="float:left; max-width:10%; width:auto;">';
-			Titlehtml+='<div style=""> &nbsp;</div>';
-			$.each(result[0],function(key,value){
-				Titlehtml+='<div style="text-align:right;  height:'+heightPercent+'%; text-align:center; vertical-align: middle; ">'+value.y+'</div>';
-			})
-			Titlehtml+='</div>'
-			$('.HeatMap #HeatMaparea').append(Titlehtml)
-			paddcss=' padding:10px; line-height: 2rem;'
-			$.each(result,function(key,value){
-				html='<div class="HeatColumn" style="float:left; width:'+percent+'%;">';
-				html+='<div style="text-align:center; ">'+timeConverter(value[0].x)+'</div>'
-				$.each(value,function(key1,value1){
-					normalized = (value1.z-ObjSeries.zmin)/(ObjSeries.zmax-ObjSeries.zmin)*100
-					console.log(normalized)
-					var h= Math.floor((100 - normalized) * 120 / 100);
-			        var s = Math.abs(normalized - 50)/50;
-			        var v = 1;
-			        color=hsv2rgb(h,s,v)
-			        R = Math.floor((255 * normalized) / 100)
-					G = Math.floor((255 * (100 - normalized)) / 100 )
-					B = 0
-					//color='rgba('+R+','+G+','+B+',.8)';
-					html+='<div class="Heatcells" style="background:'+color+';   height:'+heightPercent+'%; text-align:center; vertical-align: middle;  " data-value='+value1.z+'></div>'; //
-				});
-				html+='</div>'
-				$('.HeatMap #HeatMaparea').append(html)
+        $('.HeatMap').append('<div class="HeatMaparea" id="HeatMaparea" style="'+graphcss+'"></div>');
+        if($.isArray(settings.heatSeries))
+ 	   	{
+			if(ObjSeries.type=='col')
+			{
+				percent=90/heatCol;
+				heightPercent=90/heatRow;
+				Titlehtml='<div class="HeatColumn" style="float:left; max-width:10%; width:auto;">';
+				Titlehtml+='<div style=""> &nbsp;</div>';
+				$.each(result[0],function(key,value){
+					Titlehtml+='<div style="text-align:right;  height:'+heightPercent+'%; text-align:center; vertical-align: middle; ">'+value.y+'</div>';
+				})
+				Titlehtml+='</div>'
+				$('.HeatMap #HeatMaparea').append(Titlehtml)
+				paddcss=' padding:10px; line-height: 2rem;'
+				$.each(result,function(key,value){
+					html='<div class="HeatColumn" style="float:left; width:'+percent+'%;">';
+					html+='<div style="text-align:center; ">'+timeConverter(value[0].x)+'</div>'
+					$.each(value,function(key1,value1){
+						normalized = (value1.z-ObjSeries.zmin)/(ObjSeries.zmax-ObjSeries.zmin)*100
+						// console.log(normalized)
+						var h= Math.floor((100 - normalized) * 120 / 100);
+				        var s = Math.abs(normalized - 50)/50;
+				        var v = 1;
+				        color=hsv2rgb(h,s,v)
+				        R = Math.floor((255 * normalized) / 100)
+						G = Math.floor((255 * (100 - normalized)) / 100 )
+						B = 0
+						//color='rgba('+R+','+G+','+B+',.8)';
+						html+='<div class="Heatcells" style="background:'+color+';   height:'+heightPercent+'%; text-align:center; vertical-align: middle;  " data-value='+value1.z+'></div>'; //
+					});
+					html+='</div>'
+					$('.HeatMap #HeatMaparea').append(html)
+					
 
-			})
-			
-			$(".HeatColumn .Heatcells").hover(function(){
-				 zvalue=$(this).data('value');			
-				 $(this).append('<div class="HeatLegend" style="width:100px; height30px; background:rgba(255,255,255,.9); padding:5px; position: relative; left:25px; border:1px dotted #ddd; transition:2s; line-height:1rem; border-radius:3px;">'+settings.zAxis.popup.Text+' '+zvalue+'</div>');
-				 },function(){
-				 $(this).empty();
-			});
+				})
+				
+				$(".HeatColumn .Heatcells").hover(function(){
+					 zvalue=$(this).data('value');			
+					 $(this).append('<div class="HeatLegend" style="width:100px; height30px; background:rgba(255,255,255,.9); padding:5px; position: relative; left:25px; border:1px dotted #ddd; transition:2s; line-height:1rem; border-radius:3px;">'+settings.zAxis.popup.Text+' '+zvalue+'</div>');
+					 },function(){
+					 $(this).empty();
+				});
+			}
 		}
 		else
 		{
+			if(ObjSeries.type=='col')
+			{
+				percent=90/heatCol;
+				
+				Titlehtml='<div class="HeatColumn" style="float:left; max-width:10%; width:auto;">';
+				Titlehtml+='<div style="test" style="height:20px;"> &nbsp;</div>';
+				
+				sz=$('#HeatMaparea').height();
+				if(((heatRow+1)*14)<=sz)
+				{
+					skipvalue=1;
+					heightPercent=14;
+				}
+				else
+				{
+					heightPercent=(sz/(heatRow+1));
+					console.log(heightPercent)
+					skipvalue=Math.ceil(heatRow/heightPercent)
+				}
+				$.each(Object.keys(settings.heatSeries[firstItem].total_events),function(key,value){
+					if(key%skipvalue==0||key==heatRow)
+						dvalue=value
+					else
+						dvalue=''
+						Titlehtml+='<div style="text-align:right;  height:'+heightPercent+'px; text-align:center; vertical-align: middle; ">'+dvalue+'</div>';
+					
+				})
+				
+				Titlehtml+='</div>'
+				$('.HeatMap #HeatMaparea').append(Titlehtml)
+				paddcss=' padding:10px; line-height: 2rem;'
 
+				cz=$('#HeatMaparea').width();
+				if(((heatCol+1)*80)<=cz)
+				{
+					skipcvalue=1;
+					widthPercent=50;
+				}
+				else
+				{
+					widthPercent=(cz/(heatCol))*10;
+					wdper=cz/(heatCol+1)
+					skipcvalue=Math.ceil(heatCol/widthPercent)*12
+				}
+				if(cz<300)
+				{
+					addOverflow='max-height:18px; overflow-y:hidden;'
+				}
+				else
+				{
+					addOverflow=''
+				}
+				skCnt=0;
+				
+				$.each(settings.heatSeries,function(key,value){
+					
+					if(skCnt%skipcvalue==0||key==heatRow)
+					{
+						dateValue=timeConverter(parseInt(key))
+						dss=widthPercent;
+					}
+					else{
+						dateValue='&nbsp;';
+						dss=wdper
+					}
+					html='<div class="HeatColumn" style="float:left; width:'+wdper+'px; height:100%;">';
+					html+='<div style="text-align:center; width:'+dss+'px; position:relative; z-index:9; height:20px;" '+addOverflow+'">'+dateValue+'</div>'
+					$.each(value.total_events,function(key1,value1){
+						$.each(settings.zAxis.colorRange,function(ck,cv){
+							part=ck.split('-')
+							if(value1<=parseInt(part[1])&&value1>=parseInt(part[0]))
+							{
+								color=cv;
+							}
+						});
+						// normalized = (value1-ObjSeries.zmin)/(ObjSeries.zmax-ObjSeries.zmin)*100
+						// // console.log(normalized)
+						// var h= Math.floor((100 - normalized) * 120 / 100);
+				  //       var s = Math.abs(normalized - 50)/50;
+				  //       var v = 1;
+				  //       color=hsv2rgb(h,s,v)
+				  //       R = Math.floor((255 * normalized) / 100)
+						// G = Math.floor((255 * (100 - normalized)) / 100 )
+						// B = 0
+						//color='rgba('+R+','+G+','+B+',.8)';
+						 html+='<div class="Heatcells" style="background:'+color+'; width:'+wdper+'px;  height:'+heightPercent+'px; text-align:center; vertical-align: middle;  position:relative; z-index:8; " data-value='+value1+'></div>'; //
+					});
+					
+					skCnt++;
+					html+='</div>';
+					$('.HeatMap #HeatMaparea').append(html)
+				})
+				
+				
+			}
 		}
 
 			
        }
-       
+
+
+       	function getWeekNumber(d) {
+		    // Copy date so don't modify original
+		    d = new Date(+d);
+		    d.setHours(0,0,0);
+		    // Set to nearest Thursday: current date + 4 - current day number
+		    // Make Sunday's day number 7
+		    d.setDate(d.getDate() + 4 - (d.getDay()||7));
+		    // Get first day of year
+		    var yearStart = new Date(d.getFullYear(),0,1);
+		    // Calculate full weeks to nearest Thursday
+		    var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7)
+		    // Return array of year and week number
+		    return [d.getFullYear(), weekNo];
+		}
 		function timeConverter(UNIX_timestamp){
 		  var a = new Date(UNIX_timestamp);
 		  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -307,8 +448,17 @@
 		    }
 		    return arrayFromObject(groups);
 		}
-
-		
+		$.fn.extend({
+		  
+		  getData: function() {
+		  	return settings.heatSeries; 
+		  },
+		  updateData:function(newSeries)
+		  {
+		   		settings.heatSeries = newSeries;
+		   		generate();
+		  }
+		});
        
    };
 
