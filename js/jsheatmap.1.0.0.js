@@ -28,7 +28,7 @@
        	  	text 	:"Hourly vs Weekly"
        	  },
        	  legend		: {
-       	  		show : true
+       	  		show : false
        	  },
        	  xAxis		: {
        	  	type: "DateTime",
@@ -336,12 +336,15 @@
 					html+='</div>';
 					$('.HeatMap #HeatMaparea').append(html)
 				})
-				$(".HeatColumn .Heatcells").hover(function(){
-					 zvalue=$(this).data('value');			
-					 $(this).append('<div class="HeatLegend" style="width:100px; height30px; background:rgba(255,255,255,.9); padding:5px; position: relative; z-index:30; left:25px; border:1px dotted #ddd; transition:2s; line-height:1rem; border-radius:3px;">'+settings.zAxis.popup.Text+' '+zvalue+'</div>');
-					 },function(){
-					 $(this).empty();
-				});
+				if(settings.legend.show)
+				{
+					$(".HeatColumn .Heatcells").hover(function(){
+						 zvalue=$(this).data('value');			
+						 $(this).append('<div class="HeatLegend" style="width:100px; height30px; background:rgba(255,255,255,.9); padding:5px; position: relative; z-index:30; left:25px; border:1px dotted #ddd; transition:2s; line-height:1rem; border-radius:3px;">'+settings.zAxis.popup.Text+' '+zvalue+'</div>');
+						 },function(){
+						 $(this).empty();
+					});
+				}
 				
 			}
 		}
