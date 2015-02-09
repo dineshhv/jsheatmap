@@ -22,7 +22,7 @@
 	   var byweek={};
 	   var bymonth={};
        // Merge options with defaults
-       var settings = $.extend({
+       var defaults={
        	  title		: {
        	  	show	:true,
        	  	text 	:"Hourly vs Weekly"
@@ -36,7 +36,8 @@
        	  		show:true,
        	  		text:"Weekly"
        	  	},
-       	  	defaultView: "Day"
+       	  	defaultView: "Day",
+       	  	scroll: false
        	  },
           yAxis		: {
        	  	type: "Time",
@@ -44,7 +45,8 @@
        	  		show:true,
        	  		text:"Hourly"
        	  	},
-       	  	defaultView: null
+       	  	defaultView: null,
+       	  	scroll: false
        	  },
        	  zAxis		:{
        	  	 type		: "Integer",
@@ -78,7 +80,8 @@
           heatSeries:{}	
 
           
-       }, options || {});
+       };
+       var settings = $.extend(defaults, options || {});
        
        var matched, browser;
        jQuery.uaMatch = function( ua ) {
@@ -282,7 +285,7 @@
 				else
 				{
 					widthPercent=(cz/(heatCol))*10;
-					wdper=cz/(heatCol+1)
+					wdper=cz/(heatCol+3)
 					skipcvalue=Math.ceil(heatCol/widthPercent)*12
 				}
 				if(cz<300)
@@ -333,7 +336,12 @@
 					html+='</div>';
 					$('.HeatMap #HeatMaparea').append(html)
 				})
-				
+				$(".HeatColumn .Heatcells").hover(function(){
+					 zvalue=$(this).data('value');			
+					 $(this).append('<div class="HeatLegend" style="width:100px; height30px; background:rgba(255,255,255,.9); padding:5px; position: relative; z-index:30; left:25px; border:1px dotted #ddd; transition:2s; line-height:1rem; border-radius:3px;">'+settings.zAxis.popup.Text+' '+zvalue+'</div>');
+					 },function(){
+					 $(this).empty();
+				});
 				
 			}
 		}
@@ -451,11 +459,14 @@
 		$.fn.extend({
 		  
 		  getData: function() {
-		  	return settings.heatSeries; 
+		  	return settings; 
 		  },
 		  updateData:function(newSeries)
 		  {
-		   		settings.heatSeries = newSeries;
+		  		settings = $.extend({},defaults, newSeries );
+		  		console.log(settings)
+		  		// settings.heatSeries=newSeries.data
+
 		   		generate();
 		  }
 		});
