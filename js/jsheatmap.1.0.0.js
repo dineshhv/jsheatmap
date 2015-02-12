@@ -138,7 +138,7 @@
 	 	   			ObjSeries.zSeries.push(value.z);
 	 	   			ObjSeries.xSeries.push(value.x);
 	 	   			ObjSeries.ySeries.push(value.y);
-	 	   			console.log(getWeekNumber(value.x))
+	 	   			
 	 	   	});
 
 			var result = groupBy(settings.heatSeries, function(item) {
@@ -203,43 +203,96 @@
 			if(ObjSeries.type=='col')
 			{
 				percent=90/heatCol;
-				heightPercent=90/heatRow;
+				
 				Titlehtml='<div class="HeatColumn" style="float:left; max-width:10%; width:auto;">';
-				Titlehtml+='<div style=""> &nbsp;</div>';
+				Titlehtml+='<div style="test" style="height:20px;"> &nbsp;</div>';
+
+				sz=$('#HeatMaparea').height();
+				if(((heatRow+1)*14)<=sz)
+				{
+					skipvalue=1;
+					heightPercent=14;
+				}
+				else
+				{
+					heightPercent=(sz/(heatRow+1));
+					console.log(heightPercent)
+					skipvalue=Math.ceil(heatRow/heightPercent)
+				}
+
 				$.each(result[0],function(key,value){
-					Titlehtml+='<div style="text-align:right;  height:'+heightPercent+'%; text-align:center; vertical-align: middle; ">'+value.y+'</div>';
+					if(value.y%skipvalue==0||value.y==heatRow)
+						dvalue=value.y
+					else
+						dvalue=''
+					Titlehtml+='<div style="text-align:right;  height:'+heightPercent+'px; text-align:center; vertical-align: middle; ">'+dvalue+'</div>';
 				})
 				Titlehtml+='</div>'
 				$('.HeatMap #HeatMaparea').append(Titlehtml)
 				paddcss=' padding:10px; line-height: 2rem;'
+				cz=$('#HeatMaparea').width();
+				if(((heatCol+1)*80)<=cz)
+				{
+					skipcvalue=1;
+					wdper=((cz-20)/heatCol)
+					widthPercent=wdper;
+				}
+				else
+				{
+					widthPercent=(cz/(heatCol))*3;
+					wdper=(cz-20)/heatCol;
+					if(widthPercent<100)
+						skipcvalue=Math.ceil(widthPercent/heatCol)
+					else
+						skipcvalue=Math.ceil(heatCol/widthPercent)*Math.ceil(widthPercent/wdper)
+				}
+				if(cz<300)
+				{
+					addOverflow='max-height:18px; overflow-y:hidden;'
+				}
+				else
+				{
+					addOverflow=''
+				}
+				skCnt=0;
 				$.each(result,function(key,value){
-					html='<div class="HeatColumn" style="float:left; width:'+percent+'%;">';
-					html+='<div style="text-align:center; ">'+timeConverter(value[0].x)+'</div>'
+					if(key%skipcvalue==0||key==heatCol)
+					{
+						dateValue=timeConverter(parseInt(value[0].x))
+						dss=widthPercent;
+					}
+					else{
+						dateValue='&nbsp;';
+						dss=wdper
+					}
+					html='<div class="HeatColumn" style="float:left; width:'+wdper+'px;">';
+					// html+='<div style="text-align:center; ">'+dateValue+'</div>'
+					html+='<div style="text-align:center; width:'+dss+'px; position:relative; z-index:9; height:20px;" '+addOverflow+'">'+dateValue+'</div>'
 					$.each(value,function(key1,value1){
-						normalized = (value1.z-ObjSeries.zmin)/(ObjSeries.zmax-ObjSeries.zmin)*100
-						// console.log(normalized)
-						var h= Math.floor((100 - normalized) * 120 / 100);
-				        var s = Math.abs(normalized - 50)/50;
-				        var v = 1;
-				        color=hsv2rgb(h,s,v)
-				        R = Math.floor((255 * normalized) / 100)
-						G = Math.floor((255 * (100 - normalized)) / 100 )
-						B = 0
-						//color='rgba('+R+','+G+','+B+',.8)';
-						html+='<div class="Heatcells" style="background:'+color+';   height:'+heightPercent+'%; text-align:center; vertical-align: middle;  " data-value='+value1.z+'></div>'; //
+						$.each(settings.zAxis.colorRange,function(ck,cv){
+							part=ck.split('-')
+							if(value1.z<=parseInt(part[1])&&value1.z>=parseInt(part[0]))
+							{
+								color=cv;
+							}
+						});
+						
+						html+='<div class="Heatcells" style="background:'+color+';   height:'+heightPercent+'px; text-align:center; vertical-align: middle;  " data-value='+value1.z+'></div>'; //
 					});
 					html+='</div>'
 					$('.HeatMap #HeatMaparea').append(html)
 					
 
 				})
-				
-				$(".HeatColumn .Heatcells").hover(function(){
-					 zvalue=$(this).data('value');			
-					 $(this).append('<div class="HeatLegend" style="width:100px; height30px; background:rgba(255,255,255,.9); padding:5px; position: relative; left:25px; border:1px dotted #ddd; transition:2s; line-height:1rem; border-radius:3px;">'+settings.zAxis.popup.Text+' '+zvalue+'</div>');
-					 },function(){
-					 $(this).empty();
-				});
+				if(settings.legend.show)
+				{
+					$(".HeatColumn .Heatcells").hover(function(){
+						 zvalue=$(this).data('value');			
+						 $(this).append('<div class="HeatLegend" style="width:100px; height30px; background:rgba(255,255,255,.9); padding:5px; position: relative; left:25px; border:1px dotted #ddd; transition:2s; line-height:1rem; border-radius:3px;">'+settings.zAxis.popup.Text+' '+zvalue+'</div>');
+						 },function(){
+						 $(this).empty();
+					});
+				}
 			}
 		}
 		else
