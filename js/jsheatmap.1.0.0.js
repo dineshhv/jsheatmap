@@ -28,7 +28,7 @@
        	  	text 	:"Hourly vs Weekly"
        	  },
        	  legend		: {
-       	  		show : false
+       	  		show : true
        	  },
        	  xAxis		: {
        	  	type: "DateTime",
@@ -52,7 +52,7 @@
        	  	 type		: "Integer",
        	  	 popup		:{
        	  	 	show 		: true,
-       	  	 	Text	: "count"
+       	  	 	Text	: "Transient Count"
 			 },
 			 colorRange	:{
 			 	"0-0":"#000000",
@@ -241,7 +241,8 @@
 				{
 					widthPercent=(cz/(heatCol))*3;
 					wdper=(cz-20)/heatCol;
-					if(widthPercent<100)
+					
+					if(widthPercent<80)
 						skipcvalue=Math.ceil(widthPercent/heatCol)
 					else
 						skipcvalue=Math.ceil(heatCol/widthPercent)*Math.ceil(widthPercent/wdper)
@@ -277,7 +278,7 @@
 							}
 						});
 						
-						html+='<div class="Heatcells" style="background:'+color+';   height:'+heightPercent+'px; text-align:center; vertical-align: middle;  " data-value='+value1.z+'></div>'; //
+						html+='<div class="Heatcells" style="background:'+color+';   height:'+heightPercent+'px; text-align:center; vertical-align: middle;  " data-z='+value1.z+' data-x='+value1.x+' data-y='+value1.y+'></div>'; //
 					});
 					html+='</div>'
 					$('.HeatMap #HeatMaparea').append(html)
@@ -287,8 +288,11 @@
 				if(settings.legend.show)
 				{
 					$(".HeatColumn .Heatcells").hover(function(){
-						 zvalue=$(this).data('value');			
-						 $(this).append('<div class="HeatLegend" style="width:100px; height30px; background:rgba(255,255,255,.9); padding:5px; position: relative; left:25px; border:1px dotted #ddd; transition:2s; line-height:1rem; border-radius:3px;">'+settings.zAxis.popup.Text+' '+zvalue+'</div>');
+						 zvalue=$(this).data('z');
+						 xvalue=timeConverter($(this).data('x'));	
+						 // timeConverter(parseInt(value[0].x))
+						 yvalue=$(this).data('y');				
+						 $(this).append('<div class="HeatLegend" style="width:120px; height:15px; font-size:12px; font-weight:400; background:rgba(255,255,255,.9); padding:5px; position: relative; left:25px; border:1px dotted #ddd; transition:2s; line-height:1rem; border-radius:3px;">'+xvalue+' - '+yvalue+' : '+zvalue+'</div>');
 						 },function(){
 						 $(this).empty();
 					});
@@ -382,7 +386,7 @@
 						// G = Math.floor((255 * (100 - normalized)) / 100 )
 						// B = 0
 						//color='rgba('+R+','+G+','+B+',.8)';
-						 html+='<div class="Heatcells" style="background:'+color+'; width:'+wdper+'px;  height:'+heightPercent+'px; text-align:center; vertical-align: middle;  position:relative; z-index:8; " data-value='+value1+'></div>'; //
+						 html+='<div class="Heatcells" style="background:'+color+'; width:'+wdper+'px;  height:'+heightPercent+'px; text-align:center; vertical-align: middle;   " data-z='+value1+' data-y='+key1+' data-x='+key+'></div>'; //position: absolute; z-index:8;
 					});
 					
 					skCnt++;
@@ -392,8 +396,11 @@
 				if(settings.legend.show)
 				{
 					$(".HeatColumn .Heatcells").hover(function(){
-						 zvalue=$(this).data('value');			
-						 $(this).append('<div class="HeatLegend" style="width:100px; height30px; background:rgba(255,255,255,.9); padding:5px; position: relative; z-index:30; left:25px; border:1px dotted #ddd; transition:2s; line-height:1rem; border-radius:3px;">'+settings.zAxis.popup.Text+' '+zvalue+'</div>');
+						 zvalue=$(this).data('z');
+						 xvalue=timeConverter($(this).data('x'));	
+						 // timeConverter(parseInt(value[0].x))
+						 yvalue=$(this).data('y');				
+						 $(this).append('<div class="HeatLegend" style="width:120px; height:15px; font-size:12px; font-weight:400; background:rgba(255,255,255,.9); padding:5px; position: relative; left:25px; border:1px dotted #ddd; transition:2s; line-height:1rem; border-radius:3px;">'+xvalue+'-'+yvalue+' : '+zvalue+'</div>');
 						 },function(){
 						 $(this).empty();
 					});
