@@ -278,6 +278,10 @@
 					$.each(value,function(key1,value1){
 						$.each(settings.zAxis.colorRange,function(ck,cv){
 							part=ck.split('-')
+							if(!value1.z)
+							{
+								value1.z=0;
+							}
 							if(value1.z<=parseInt(part[1])&&value1.z>=parseInt(part[0]))
 							{
 								color=cv;
