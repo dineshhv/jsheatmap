@@ -17,6 +17,8 @@
        var elem = $(element);
        var obj = this;
        var rand;
+       var Randid;
+       var initRandid;
        var HeatData=[];
        var ObjSeries={};
 	   var byweek={};
@@ -164,9 +166,13 @@
  	   	ObjSeries.zmin=Math.min.apply(Math, ObjSeries.zSeries)
  	   	ObjSeries.zmax=Math.max.apply(Math,ObjSeries.zSeries)
  	   	var graphcss='height: 90%; width: 100%;';
- 	   	$(elem).append('<div class="HeatMap" id="heatmap-'+rand+'"></div>');
+ 	   	initRandid='heatmap-'+rand;
+ 	   	$(elem).append('<div class="HeatMap" id="'+initRandid+'"></div>');
+ 	    Randid=$(elem).children('.HeatMap').attr('id')
+ 	    console.log(initRandid)
+ 	    console.log(Randid)
  	   	if(settings.title.show)
- 	   		$('.HeatMap').append('<div class="HeatMapTitle" id="HeatMapTitle" style="font-size: 18px ;text-align: center;padding: 2px;">'+settings.title.text+'</div>');
+ 	   		$('#'+Randid+'.HeatMap').append('<div class="HeatMapTitle" id="HeatMapTitle" style="font-size: 18px ;text-align: center;padding: 2px;">'+settings.title.text+'</div>');
  	   	ObjSeries.axisX=settings.xAxis.type;
  	   	ObjSeries.axisY=settings.yAxis.type;
  	   	if(ObjSeries.axisX=='DateTime'||ObjSeries.axisY=='DateTime')
@@ -185,8 +191,8 @@
 	 	   	})
 	 	   	viewByString = viewByString.substring(0, viewByString.length - 1)
 	 	   	if(ObjSeries.showView)
-	 	   		$('.HeatMap').append('<div class="HeatMapviewby" id="HeatMapviewby" style="font-size: 18px ;text-align: center;padding: 2px; border:1px dotted #ddd; border-radius:4px; display:inline-block;position: relative;z-index: 2;top: -26; padding:2px 5px;">'+viewByString+'</div>');
-	 	   	$(".HeatMapviewby a").hover(function(){
+	 	   		$('#'+Randid+'.HeatMap').append('<div class="HeatMapviewby" id="HeatMapviewby" style="font-size: 18px ;text-align: center;padding: 2px; border:1px dotted #ddd; border-radius:4px; display:inline-block;position: relative;z-index: 2;top: -26; padding:2px 5px;">'+viewByString+'</div>');
+	 	   	$("#"+Randid+" .HeatMapviewby a").hover(function(){
 			  $(this).css("color","#888");
 			  },function(){
 			  $(this).css("color","#000");
@@ -197,7 +203,7 @@
         
         var tempObj=[];
         var tempData=null;
-        $('.HeatMap').append('<div class="HeatMaparea" id="HeatMaparea" style="'+graphcss+'"></div>');
+        $('#'+Randid+'.HeatMap').append('<div class="HeatMaparea" id="HeatMaparea" style="'+graphcss+'"></div>');
         if($.isArray(settings.heatSeries))
  	   	{
 			if(ObjSeries.type=='col')
@@ -207,7 +213,7 @@
 				Titlehtml='<div class="HeatColumn" style="float:left; max-width:10%; width:auto;">';
 				Titlehtml+='<div style="test" style="height:20px;"> &nbsp;</div>';
 
-				sz=$('#HeatMaparea').height();
+				sz=$('#'+Randid+' #HeatMaparea').height();
 				if(((heatRow+1)*14)<=sz)
 				{
 					skipvalue=1;
@@ -228,9 +234,9 @@
 					Titlehtml+='<div style="text-align:right;  height:'+heightPercent+'px; text-align:center; vertical-align: middle; ">'+dvalue+'</div>';
 				})
 				Titlehtml+='</div>'
-				$('.HeatMap #HeatMaparea').append(Titlehtml)
+				$('#'+Randid+'.HeatMap #HeatMaparea').append(Titlehtml)
 				paddcss=' padding:10px; line-height: 2rem;'
-				cz=$('#HeatMaparea').width();
+				cz=$('#'+Randid+' #HeatMaparea').width();
 				if(((heatCol+1)*80)<=cz)
 				{
 					skipcvalue=1;
@@ -281,13 +287,13 @@
 						html+='<div class="Heatcells" style="background:'+color+';   height:'+heightPercent+'px; text-align:center; vertical-align: middle;  " data-z='+value1.z+' data-x='+value1.x+' data-y='+value1.y+'></div>'; //
 					});
 					html+='</div>'
-					$('.HeatMap #HeatMaparea').append(html)
+					$('#'+Randid+'.HeatMap #HeatMaparea').append(html)
 					
 
 				})
 				if(settings.legend.show)
 				{
-					$(".HeatColumn .Heatcells").hover(function(){
+					$("#"+Randid+" .HeatColumn .Heatcells").hover(function(){
 						 zvalue=$(this).data('z');
 						 xvalue=timeConverter($(this).data('x'));	
 						 // timeConverter(parseInt(value[0].x))
@@ -308,7 +314,7 @@
 				Titlehtml='<div class="HeatColumn" style="float:left; max-width:10%; width:auto;">';
 				Titlehtml+='<div style="test" style="height:20px;"> &nbsp;</div>';
 				
-				sz=$('#HeatMaparea').height();
+				sz=$('#'+Randid+' #HeatMaparea').height();
 				if(((heatRow+1)*14)<=sz)
 				{
 					skipvalue=1;
@@ -330,10 +336,10 @@
 				})
 				
 				Titlehtml+='</div>'
-				$('.HeatMap #HeatMaparea').append(Titlehtml)
+				$('#'+Randid+'.HeatMap #HeatMaparea').append(Titlehtml)
 				paddcss=' padding:10px; line-height: 2rem;'
 
-				cz=$('#HeatMaparea').width();
+				cz=$('#'+Randid+' #HeatMaparea').width();
 				if(((heatCol+1)*80)<=cz)
 				{
 					skipcvalue=1;
@@ -391,11 +397,11 @@
 					
 					skCnt++;
 					html+='</div>';
-					$('.HeatMap #HeatMaparea').append(html)
+					$('#'+Randid+'.HeatMap #HeatMaparea').append(html)
 				})
 				if(settings.legend.show)
 				{
-					$(".HeatColumn .Heatcells").hover(function(){
+					$("#"+Randid+" .HeatColumn .Heatcells").hover(function(){
 						 zvalue=$(this).data('z');
 						 xvalue=timeConverter($(this).data('x'));	
 						 // timeConverter(parseInt(value[0].x))

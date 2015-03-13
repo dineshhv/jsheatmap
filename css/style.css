@@ -4,6 +4,13 @@
 	font-family: Arial,sans-serif;
 	font-size: 14px;
 }
+.graph2{
+	clear:both;
+	width:400px;
+	height: 200px;
+	font-family: Arial,sans-serif;
+	font-size: 14px;
+}
 /*.HeatMapTitle{
 	font-size: 18px !important;
 	text-align: center;
