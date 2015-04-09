@@ -56,14 +56,31 @@
        	  	 	show 		: true,
        	  	 	Text	: "Transient Count"
 			 },
-			 colorRange	:{
-			 	"0-0":"#000000",
-			 	"1-20":"#2ea300",
-			 	"21-40":"#90ff00",
-			 	"41-60":"#fff600",
-			 	"61-80":"#ff8c00",
-			 	"81-100":"#ff0000 "
-			 }
+			 colorRange	:[{
+			 	"min":0,
+			 	"max":20,
+			 	"color":"#000000"
+			 },
+			 {
+			 	"min":21,
+			 	"max":40,
+			 	"color":"#782EF0"
+			 },
+			 {
+			 	"min":41,
+			 	"max":60,
+			 	"color":"#F02E5B"
+			 },
+			 {
+			 	"min":61,
+			 	"max":80,
+			 	"color":"#11E2ED"
+			 },
+			 {
+			 	"min":81,
+			 	"max":null,
+			 	"color":"#EDED11"
+			 }]
        	  },
        	  colorRange:{
        	  	start:[]
@@ -249,9 +266,20 @@
 					wdper=(cz-20)/heatCol;
 					
 					if(widthPercent<80)
-						skipcvalue=Math.ceil(widthPercent/heatCol)
+					{	
+						if(widthPercent<heatCol)
+						{
+								widthPercent=widthPercent*3;
+								offst=wdper*2;
+						}
+						offst=wdper;
+						skipcvalue=Math.ceil(widthPercent/heatCol)*Math.ceil(widthPercent/wdper)
+					}
 					else
+					{
+						offst=wdper;
 						skipcvalue=Math.ceil(heatCol/widthPercent)*Math.ceil(widthPercent/wdper)
+					}
 				}
 				if(cz<300)
 				{
@@ -266,7 +294,7 @@
 					if(key%skipcvalue==0||key==heatCol)
 					{
 						dateValue=timeConverter(parseInt(value[0].x))
-						dss=widthPercent;
+						dss=widthPercent+offst;
 					}
 					else{
 						dateValue='&nbsp;';
@@ -277,14 +305,39 @@
 					html+='<div style="text-align:center; width:'+dss+'px; position:relative; z-index:9; height:20px;" '+addOverflow+'">'+dateValue+'</div>'
 					$.each(value,function(key1,value1){
 						$.each(settings.zAxis.colorRange,function(ck,cv){
-							part=ck.split('-')
+							// part=ck.split('-')
+							
 							if(!value1.z)
 							{
 								value1.z=0;
 							}
-							if(value1.z<=parseInt(part[1])&&value1.z>=parseInt(part[0]))
+							
+							if ( value1.z > 0 ) {
+								if(value1.z>=cv.min)
+								{
+									if(cv.max&&value1.z<=cv.max)
+									{
+										color=cv.color;
+									}
+									else
+									{
+										color=cv.color;
+									}
+								}
+							}
+							else
 							{
-								color=cv;
+								if(value1.z<=cv.min)
+								{
+									if(cv.max&&value1.z>=cv.max)
+									{
+										color=cv.color;
+									}
+									else
+									{
+										color=cv.color;
+									}
+								}
 							}
 						});
 						

@@ -1,15 +1,19 @@
 .graph{
 	width:400px;
-	height: 200px;
+	height: 250px;
 	font-family: Arial,sans-serif;
 	font-size: 14px;
+	display: inline-block;
+	margin-bottom: 10px;
 }
 .graph2{
 	clear:both;
 	width:400px;
-	height: 200px;
+	height: 250px;
 	font-family: Arial,sans-serif;
 	font-size: 14px;
+	display: inline-block;
+	margin-bottom: 10px;
 }
 /*.HeatMapTitle{
 	font-size: 18px !important;
