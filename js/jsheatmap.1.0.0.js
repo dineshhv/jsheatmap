@@ -259,6 +259,7 @@
 					skipcvalue=1;
 					wdper=((cz-20)/heatCol)
 					widthPercent=wdper;
+					offst=wdper;
 				}
 				else
 				{
@@ -312,7 +313,7 @@
 								value1.z=0;
 							}
 							
-							if ( value1.z > 0 ) {
+							if ( value1.z >= 0 ) {
 								if(value1.z>=cv.min)
 								{
 									if(cv.max&&value1.z<=cv.max)
